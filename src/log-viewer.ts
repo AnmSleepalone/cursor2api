@@ -1,14 +1,15 @@
 /**
  * log-viewer.ts - 全链路日志 Web UI v4
- * 
+ *
  * 静态文件分离版：HTML/CSS/JS 放在 public/ 目录，此文件只包含 API 路由和文件服务
  */
 
 import type { Request, Response } from 'express';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getAllLogs, getRequestSummaries, getStats, getRequestPayload, subscribeToLogs, subscribeToSummaries, clearAllLogs } from './logger.js';
+import { staticAssets } from './static-assets.js';
 
 // ==================== 静态文件路径 ====================
 
@@ -17,7 +18,18 @@ const __dirname = dirname(__filename);
 const publicDir = join(__dirname, '..', 'public');
 
 function readPublicFile(filename: string): string {
-    return readFileSync(join(publicDir, filename), 'utf-8');
+    // 优先使用内嵌的文件内容（用于二进制打包）
+    if (staticAssets[filename]) {
+        return staticAssets[filename];
+    }
+
+    // 回退到文件系统读取（用于开发模式）
+    const filePath = join(publicDir, filename);
+    if (existsSync(filePath)) {
+        return readFileSync(filePath, 'utf-8');
+    }
+
+    throw new Error(`File not found: ${filename}`);
 }
 
 // ==================== API 路由 ====================

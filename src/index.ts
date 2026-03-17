@@ -6,17 +6,16 @@
  */
 
 import 'dotenv/config';
-import { createRequire } from 'module';
 import express from 'express';
 import { getConfig } from './config.js';
 import { handleMessages, listModels, countTokens } from './handler.js';
 import { handleOpenAIChatCompletions, handleOpenAIResponses } from './openai-handler.js';
 import { serveLogViewer, apiGetLogs, apiGetRequests, apiGetStats, apiGetPayload, apiLogsStream, serveLogViewerLogin, apiClearLogs } from './log-viewer.js';
 import { loadLogsFromFiles } from './logger.js';
+import packageJson from '../package.json' assert { type: 'json' };
 
 // 从 package.json 读取版本号，统一来源，避免多处硬编码
-const require = createRequire(import.meta.url);
-const { version: VERSION } = require('../package.json') as { version: string };
+const VERSION = packageJson.version;
 
 
 const app = express();
